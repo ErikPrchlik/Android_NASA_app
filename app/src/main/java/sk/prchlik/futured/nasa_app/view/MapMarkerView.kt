@@ -1,11 +1,9 @@
 package sk.prchlik.futured.nasa_app.view
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import sk.prchlik.futured.nasa_app.R
@@ -24,15 +22,19 @@ class MapMarkerView @JvmOverloads constructor(
     }
 
     fun setContent(
-        circle: CircleContent
+        circle: CircleContent,
+        drawable: Drawable?
     ) {
 
         when (circle) {
             is CircleContent.Cluster -> {
+                binding.mapMarkerViewPin.setImageDrawable(context.getDrawable(R.drawable.blue_circle))
                 binding.mapMarkerViewClusterText.isVisible = true
                 binding.mapMarkerViewClusterText.text = circle.count.toString()
             }
             is CircleContent.Marker -> {
+                binding.mapMarkerViewPin.setImageDrawable(drawable)
+                binding.mapMarkerViewPin.background = null
                 binding.mapMarkerViewClusterText.isVisible = false
             }
         }

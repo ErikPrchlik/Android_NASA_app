@@ -122,7 +122,6 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
         clusterManager.renderer = mapRenderer
 
         googleMap.setOnCameraIdleListener(boundariesListener)
-        googleMap.setOnMarkerClickListener(boundariesListener)
 
         // Data visualization and updating
         val scope = CoroutineScope(Job() + Dispatchers.IO)
@@ -138,8 +137,8 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 // Initialization of data for visualization
                 if (meteorites.isEmpty()) {
-                    meteorites = data.filter {
-                        it.latLng != null && (it.latLng != LatLng(0.0,0.0) && it.fall != "Fell")
+                    meteorites = data.filter {item ->
+                        item.latLng != null || (item.latLng == LatLng(0.0, 0.0) && item.fall != "Fell")
                     }.toMutableList()
                 }
 
@@ -226,8 +225,14 @@ class MapMarkersRenderer(
     }
 
     private fun getItemIcon(marker: Meteorite): IconData {
+        val drawable = when(marker.fall) {
+            "Fell" -> context.getDrawable(R.drawable.meteorite)
+            "Found" -> context.getDrawable(R.drawable.crater)
+            else -> null
+        }
         mapMarkerView.setContent(
-            circle = MapMarkerView.CircleContent.Marker
+            circle = MapMarkerView.CircleContent.Marker,
+            drawable
         )
 
         val icon: Bitmap = markerIconGenerator.makeIcon()
@@ -260,7 +265,8 @@ class MapMarkersRenderer(
         mapMarkerView.setContent(
             circle = MapMarkerView.CircleContent.Cluster(
                 count = cluster.size
-            )
+            ),
+            drawable = null
         )
 
         val icon: Bitmap = markerIconGenerator.makeIcon()
@@ -273,7 +279,7 @@ class MapMarkersRenderer(
         )
     }
 
-    override fun shouldRenderAsCluster(cluster: Cluster<Meteorite>): Boolean = cluster.size > 1
+    override fun shouldRenderAsCluster(cluster: Cluster<Meteorite>): Boolean = cluster.size > 10
 
     private data class IconData(
         val bitmapDescriptor: BitmapDescriptor,
