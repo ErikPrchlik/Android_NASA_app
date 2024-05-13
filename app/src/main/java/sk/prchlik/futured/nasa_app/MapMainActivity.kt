@@ -3,6 +3,7 @@ package sk.prchlik.futured.nasa_app
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
@@ -153,13 +154,35 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                 }
             }
+        }
+        clusterManager.setOnClusterClickListener {
+            val latLng = it.position
+            val zoomLevel = googleMap.cameraPosition.zoom+0.5f
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
+            googleMap.animateCamera(cameraUpdate)
+            clusterManager.cluster()
+            true
+        }
+        clusterManager.setOnClusterItemClickListener { item ->
+            // Get the underlying marker associated with the clicked ClusterItem
+            val marker = clusterManager.markerCollection.markers
+                .find { it.position == item.position }
 
+            marker?.title = item.title
+            marker?.snippet = item.snippet
+            marker?.setInfoWindowAnchor(0.4f, 0.5f)
+            // Show the info window for the marker
+            marker?.showInfoWindow()
+            clusterManager.cluster()
+
+            // Return true to indicate that the listener has consumed the event
+            true
         }
     }
 
     internal class BoundariesListener(
         private val map: GoogleMap,
-    ) : GoogleMap.OnCameraIdleListener, GoogleMap.OnMarkerClickListener {
+    ) : GoogleMap.OnCameraIdleListener {
 
         private val _boundariesFlow = MutableSharedFlow<LatLngBounds>(
             replay = 1,
@@ -170,12 +193,6 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
         override fun onCameraIdle() {
             val boundaries = map.projection.visibleRegion.latLngBounds
             _boundariesFlow.tryEmit(boundaries)
-        }
-
-        override fun onMarkerClick(marker: Marker): Boolean {
-            // Show info window for the clicked marker
-            marker.showInfoWindow()
-            return true // Return true to indicate that the click event has been consumed
         }
     }
 
