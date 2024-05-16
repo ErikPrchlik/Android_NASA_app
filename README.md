@@ -10,7 +10,6 @@ Welcome to the Meteorite Info App! This Android application provides information
 - [Usage](#usage)
 - [API Documentation](#api-documentation)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Introduction
 
@@ -62,10 +61,6 @@ We welcome contributions to improve the app! If you have suggestions or bug repo
 3. Commit your changes: `git commit -m 'Add some feature'`
 4. Push to the branch: `git push origin feature/YourFeature`
 5. Open a pull request.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
