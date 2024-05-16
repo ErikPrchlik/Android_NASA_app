@@ -2,6 +2,8 @@
 
 Welcome to the Meteorite Info App! This Android application provides information about meteorites that have fallen to Earth, powered by data from NASA's open API.
 
+<img src="https://github.com/ErikPrchlik/Android_NASA_app/assets/34059320/0d818443-232f-437e-9c75-28e15c77e2b7" width="300">
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Features](#features)
