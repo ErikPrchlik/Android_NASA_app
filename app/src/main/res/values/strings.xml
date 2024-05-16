@@ -45,4 +45,6 @@
     </string>
     <string name="communication_error">Something went wrong during COMMUNICATION</string>
     <string name="communication_exception">Something went wrong during COMMUNICATION - EXCEPTION</string>
+    <string name="category_fell">Fell</string>
+    <string name="category_found">Found</string>
 </resources>

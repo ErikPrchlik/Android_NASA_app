@@ -1,6 +1,5 @@
 package sk.prchlik.futured.nasa_app.repository.remote
 
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import sk.prchlik.futured.nasa_app.communication.CommunicationError
@@ -24,7 +23,6 @@ class MeteoritesRemoteRepoImpl(private val meteoritesAPI: MeteoritesAPI): IMeteo
                 return CommunicationResult.Error(CommunicationError(response.code(), response.errorBody().toString()))
             }
         } catch (ex: Exception) {
-            Log.e("REPO", ex.message.toString())
             CommunicationResult.Exception(ex)
         }
     }

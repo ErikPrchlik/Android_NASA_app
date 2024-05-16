@@ -52,7 +52,7 @@
                 android:layout_marginTop="18dp"
                 android:gravity="center"
                 android:textColor="@color/my_secondary"
-                android:text="Fell"/>
+                android:text="@string/category_fell"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -71,7 +71,7 @@
                 android:layout_marginEnd="@dimen/fab_margin"
                 android:gravity="center"
                 android:textColor="@color/my_secondary"
-                android:text="Found"/>
+                android:text="@string/category_found"/>
 
         </LinearLayout>
 

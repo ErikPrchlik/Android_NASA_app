@@ -9,6 +9,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -69,55 +70,29 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment!!.getMapAsync(this)
 
+        // Meteorite list view
         binding.listView.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null)
                 .setAnchorView(R.id.list_view).show()
+            //TODO start new activity
         }
 
-        binding.menuFell.setOnClickListener { view ->
-            (view as TextView).setTextColor(this.getColor(R.color.my_primary))
-            binding.menuFound.setTextColor(this.getColor(R.color.my_secondary))
-            val scope = CoroutineScope(Job() + Dispatchers.IO)
-            scope.launch {
-                viewModel.dataFlow.combine(boundariesListener.boundariesFlow) { data, boundaries ->
-                    data to boundaries
-                }.collect { (data, boundaries) ->
-                    updateData(data, boundaries) { boundaries.contains(it.position) && it.fall == "Fell" }
-                }
-            }
-            binding.menu.visibility = View.GONE
-            binding.filterClear.visibility = View.VISIBLE
-        }
+        // Filter of meteorites menu settings
+        setUpFilter()
+    }
 
-        binding.menuFound.setOnClickListener { view ->
-            (view as TextView).setTextColor(this.getColor(R.color.my_primary))
-            binding.menuFell.setTextColor(this.getColor(R.color.my_secondary))
-            val scope = CoroutineScope(Job() + Dispatchers.IO)
-            scope.launch {
-                viewModel.dataFlow.combine(boundariesListener.boundariesFlow) { data, boundaries ->
-                    data to boundaries
-                }.collect { (data, boundaries) ->
-                    updateData(data, boundaries) { boundaries.contains(it.position) && it.fall == "Found" }
-                }
-            }
-            binding.menu.visibility = View.GONE
-            binding.filterClear.visibility = View.VISIBLE
-        }
+    private fun setUpFilter() {
+        // Behavior of filter
 
-        binding.filterClear.setOnClickListener {
-            val scope = CoroutineScope(Job() + Dispatchers.IO)
-            scope.launch {
-                viewModel.dataFlow.combine(boundariesListener.boundariesFlow) { data, boundaries ->
-                    data to boundaries
-                }.collect { (data, boundaries) ->
-                    updateData(data, boundaries) { boundaries.contains(it.position) }
-                }
-            }
-            binding.filterClear.visibility = View.GONE
-            binding.menuFell.setTextColor(this.getColor(R.color.my_secondary))
-            binding.menuFound.setTextColor(this.getColor(R.color.my_secondary))
-        }
+        // Category Fell chosen for filtering
+        showFell()
+
+        // Category Found chosen for filtering
+        showFound()
+
+        // Clear filter and show all
+        removeFilter()
 
         binding.filter.setOnClickListener {
             if (binding.menu.visibility != View.VISIBLE) {
@@ -125,6 +100,66 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
             } else {
                 binding.menu.visibility = View.GONE
             }
+        }
+    }
+
+    private fun removeFilter() {
+        binding.filterClear.setOnClickListener {
+            // Update the map on background thread
+            val scope = CoroutineScope(Job() + Dispatchers.IO)
+            scope.launch {
+                viewModel.dataFlow.combine(boundariesListener.boundariesFlow) { data, boundaries ->
+                    data to boundaries
+                }.collect { (data, boundaries) ->
+                    // Show meteorites by boundaries
+                    updateData(data, boundaries) { boundaries.contains(it.position) }
+                }
+            }
+            binding.filterClear.visibility = View.GONE
+            binding.menuFell.setTextColor(this.getColor(R.color.my_secondary))
+            binding.menuFound.setTextColor(this.getColor(R.color.my_secondary))
+        }
+    }
+
+    private fun showFound() {
+        binding.menuFound.setOnClickListener { view ->
+            (view as TextView).setTextColor(this.getColor(R.color.my_primary))
+            binding.menuFell.setTextColor(this.getColor(R.color.my_secondary))
+
+            // Update the map by filter on background thread
+            val scope = CoroutineScope(Job() + Dispatchers.IO)
+            scope.launch {
+                viewModel.dataFlow.combine(boundariesListener.boundariesFlow) { data, boundaries ->
+                    data to boundaries
+                }.collect { (data, boundaries) ->
+                    // Given lambda function as specific filter for update
+                    updateData(data, boundaries) { boundaries.contains(it.position) && it.fall == "Found" }
+                }
+            }
+
+            binding.menu.visibility = View.GONE
+            binding.filterClear.visibility = View.VISIBLE
+        }
+    }
+
+    private fun showFell() {
+        binding.menuFell.setOnClickListener { view ->
+            (view as TextView).setTextColor(this.getColor(R.color.my_primary))
+            binding.menuFound.setTextColor(this.getColor(R.color.my_secondary))
+
+            // Update the map by filter on background thread
+            val scope = CoroutineScope(Job() + Dispatchers.IO)
+            scope.launch {
+                viewModel.dataFlow.combine(boundariesListener.boundariesFlow) { data, boundaries ->
+                    data to boundaries
+                }.collect { (data, boundaries) ->
+                    // Given lambda function as specific filter for update
+                    updateData(data, boundaries) { boundaries.contains(it.position) && it.fall == "Fell" }
+                }
+            }
+
+            binding.menu.visibility = View.GONE
+            binding.filterClear.visibility = View.VISIBLE
         }
     }
 
@@ -206,26 +241,19 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
         )
         clusterManager.renderer = mapRenderer
 
+        // Changing of boundaries for updating
         googleMap.setOnCameraIdleListener(boundariesListener)
 
         // Data visualization and updating
-        val scope = CoroutineScope(Job() + Dispatchers.IO)
-        scope.launch {
-            viewModel.dataFlow.combine(boundariesListener.boundariesFlow) { data, boundaries ->
-                data to boundaries
-            }.collect { (data, boundaries) ->
-                updateData(data, boundaries) { boundaries.contains(it.position) }
-                binding.filter.visibility = View.VISIBLE
-            }
-        }
-        clusterManager.setOnClusterClickListener {
-            val latLng = it.position
-            val zoomLevel = googleMap.cameraPosition.zoom+0.5f
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
-            googleMap.animateCamera(cameraUpdate)
-            clusterManager.cluster()
-            true
-        }
+        loadData()
+
+        // OnClick actions
+        onClusterClick()
+        onClusterItemClick()
+    }
+
+    private fun onClusterItemClick() {
+        // Show InfoWindow when clicked
         clusterManager.setOnClusterItemClickListener { item ->
             // Get the underlying marker associated with the clicked ClusterItem
             val marker = clusterManager.markerCollection.markers
@@ -240,6 +268,33 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
             // Return true to indicate that the listener has consumed the event
             true
+        }
+    }
+
+    private fun onClusterClick() {
+        // Zoom to the center of cluster
+        clusterManager.setOnClusterClickListener {
+            val latLng = it.position
+            val zoomLevel = googleMap.cameraPosition.zoom+0.5f
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
+            googleMap.animateCamera(cameraUpdate)
+            clusterManager.cluster()
+            true
+        }
+    }
+
+    private fun loadData() {
+        // Data visualization and updating on background thread
+        val scope = CoroutineScope(Job() + Dispatchers.IO)
+        scope.launch {
+            // Collecting current data and boundaries
+            viewModel.dataFlow.combine(boundariesListener.boundariesFlow) { data, boundaries ->
+                data to boundaries
+            }.collect { (data, boundaries) ->
+                // Show meteorites by boundaries
+                updateData(data, boundaries) { boundaries.contains(it.position) }
+                binding.filter.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -289,11 +344,13 @@ class MapMarkersRenderer(
     }
 
     private fun getItemIcon(marker: Meteorite): IconData {
+        // Setting icon by meteorite category
         val drawable = when(marker.fall) {
-            "Fell" -> context.getDrawable(R.drawable.meteorite)
-            "Found" -> context.getDrawable(R.drawable.crater)
+            "Fell" -> AppCompatResources.getDrawable(context, R.drawable.meteorite)
+            "Found" -> AppCompatResources.getDrawable(context, R.drawable.crater)
             else -> null
         }
+        // Custom marker view
         mapMarkerView.setContent(
             circle = MapMarkerView.CircleContent.Marker,
             drawable
@@ -326,6 +383,7 @@ class MapMarkersRenderer(
     }
 
     private fun getClusterIcon(cluster: Cluster<Meteorite>): IconData {
+        // Custom Cluster view
         mapMarkerView.setContent(
             circle = MapMarkerView.CircleContent.Cluster(
                 count = cluster.size

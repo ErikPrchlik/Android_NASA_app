@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import sk.prchlik.futured.nasa_app.R
@@ -28,7 +29,9 @@ class MapMarkerView @JvmOverloads constructor(
 
         when (circle) {
             is CircleContent.Cluster -> {
-                binding.mapMarkerViewPin.setImageDrawable(context.getDrawable(R.drawable.blue_circle))
+                binding.mapMarkerViewPin.setImageDrawable(
+                    AppCompatResources.getDrawable(context, R.drawable.blue_circle)
+                )
                 binding.mapMarkerViewClusterText.isVisible = true
                 binding.mapMarkerViewClusterText.text = circle.count.toString()
             }
