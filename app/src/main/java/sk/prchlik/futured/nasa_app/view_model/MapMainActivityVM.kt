@@ -36,6 +36,10 @@ class MapMainActivityVM(app: Application,
 
     init {
         // On the injection of VM to activity running tasks parallel on background thread
+        getData()
+    }
+
+    fun getData() {
         _meteoritesState.value = State.Loading
         viewModelScope.launch {
             try {

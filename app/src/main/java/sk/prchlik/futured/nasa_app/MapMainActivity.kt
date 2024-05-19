@@ -80,6 +80,17 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Filter of meteorites menu settings
         setUpFilter()
+
+        // Refresh button on communication error
+        onRefreshClick()
+    }
+
+    private fun onRefreshClick() {
+        binding.refresh.setOnClickListener {
+            viewModel.getData()
+            binding.mapContainer.loading.visibility = View.VISIBLE
+            binding.refresh.visibility = View.GONE
+        }
     }
 
     private fun setUpFilter() {
@@ -182,6 +193,10 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
     private suspend fun updateData(data: MutableList<Meteorite>,
                                    boundaries: LatLngBounds,
                                    f: (Meteorite) -> Boolean) {
+        if (data.isEmpty()) {
+            binding.refresh.visibility = View.VISIBLE
+        }
+
         //Clear map content
         withContext(Dispatchers.Main) {
             clusterManager.clearItems()

@@ -134,6 +134,17 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <ImageButton
+        android:id="@+id/refresh"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|bottom"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:src="@drawable/ic_refresh_24"
+        app:tint="@color/my_primary"
+        android:backgroundTint="@color/white"
+        android:visibility="gone"/>
+
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
