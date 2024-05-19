@@ -40,6 +40,7 @@ class MapMainActivityVM(app: Application,
     }
 
     fun getData() {
+        // Request data
         _meteoritesState.value = State.Loading
         viewModelScope.launch {
             try {

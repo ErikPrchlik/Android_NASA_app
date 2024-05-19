@@ -86,6 +86,7 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun onRefreshClick() {
+        // New load data request
         binding.refresh.setOnClickListener {
             viewModel.getData()
             binding.mapContainer.loading.visibility = View.VISIBLE
@@ -193,11 +194,12 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
     private suspend fun updateData(data: MutableList<Meteorite>,
                                    boundaries: LatLngBounds,
                                    f: (Meteorite) -> Boolean) {
+        // Refresh needed
         if (data.isEmpty()) {
             binding.refresh.visibility = View.VISIBLE
         }
 
-        //Clear map content
+        // Clear map content
         withContext(Dispatchers.Main) {
             clusterManager.clearItems()
             binding.mapContainer.loading.visibility = View.VISIBLE
