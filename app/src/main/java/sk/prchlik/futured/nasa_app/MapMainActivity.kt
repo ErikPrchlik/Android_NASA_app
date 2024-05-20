@@ -194,15 +194,16 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
     private suspend fun updateData(data: MutableList<Meteorite>,
                                    boundaries: LatLngBounds,
                                    f: (Meteorite) -> Boolean) {
-        // Refresh needed
-        if (data.isEmpty()) {
-            binding.refresh.visibility = View.VISIBLE
-        }
 
-        // Clear map content
         withContext(Dispatchers.Main) {
+            // Clear map content
             clusterManager.clearItems()
             binding.mapContainer.loading.visibility = View.VISIBLE
+
+            // Refresh needed
+            if (data.isEmpty()) {
+                binding.refresh.visibility = View.VISIBLE
+            }
         }
 
         // Initialization of data for visualization
