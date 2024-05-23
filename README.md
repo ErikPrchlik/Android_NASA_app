@@ -2,7 +2,10 @@
 
 Welcome to the Meteorite Info App! This Android application provides information about meteorites that have fallen to Earth, powered by data from NASA's open API.
 
-<img src="https://github.com/ErikPrchlik/Android_NASA_app/assets/34059320/0d818443-232f-437e-9c75-28e15c77e2b7" width="300">
+<p align="middle">
+  <img src="https://github.com/ErikPrchlik/Android_NASA_app/assets/34059320/0d818443-232f-437e-9c75-28e15c77e2b7" width="300">
+  <img src="https://github.com/ErikPrchlik/Android_NASA_app/assets/34059320/9069a25d-eac0-4a12-b7d1-0886334e7863" width="300">  
+</p>
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -22,6 +25,7 @@ The Meteorite Info App is designed to help users learn about meteorites that hav
 - **Meteorite Data**: Fetch and display detailed information about meteorites.
 - **Search Functionality**: Find meteorites by name, year, or location. (TODO)
 - **Interactive Map**: Visualize meteorite locations on a map.
+- **List Categorization**: Visualize meteorites in multiple lists.
 - **Detail View**: View comprehensive details about each meteorite. (IN PROGRESS)
 
 ## Getting Started
