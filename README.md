@@ -4,7 +4,7 @@ Welcome to the Meteorite Info App! This Android application provides information
 
 <p align="middle">
   <img src="https://github.com/ErikPrchlik/Android_NASA_app/assets/34059320/0d818443-232f-437e-9c75-28e15c77e2b7" width="300">
-  <img src="https://github.com/ErikPrchlik/Android_NASA_app/assets/34059320/f85c6034-0211-41d5-a318-35aa752259e3" width="300">  
+  <img src="https://github.com/ErikPrchlik/Android_NASA_app/assets/34059320/4d898bd9-0df0-4837-b2be-2330ee1e2be0" width="300">  
 </p>
 
 ## Table of Contents
