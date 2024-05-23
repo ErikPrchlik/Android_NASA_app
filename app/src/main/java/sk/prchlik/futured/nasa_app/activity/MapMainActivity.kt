@@ -1,31 +1,20 @@
-package sk.prchlik.futured.nasa_app
+package sk.prchlik.futured.nasa_app.activity
 
-import android.content.Context
-import android.graphics.Bitmap
+import android.content.Intent
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.material.snackbar.Snackbar
-import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterManager
-import com.google.maps.android.clustering.view.DefaultClusterRenderer
-import com.google.maps.android.ui.IconGenerator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -36,9 +25,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import sk.prchlik.futured.nasa_app.R
 import sk.prchlik.futured.nasa_app.databinding.ActivityMainBinding
 import sk.prchlik.futured.nasa_app.model.Meteorite
-import sk.prchlik.futured.nasa_app.view.MapMarkerView
+import sk.prchlik.futured.nasa_app.view.MapMarkersRenderer
 import sk.prchlik.futured.nasa_app.view_model.MapMainActivityVM
 
 class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -72,10 +62,7 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Meteorite list view
         binding.listView.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .setAnchorView(R.id.list_view).show()
-            //TODO start new activity
+            startActivity(Intent(this, ListActivity::class.java))
         }
 
         // Filter of meteorites menu settings
@@ -106,6 +93,7 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
         // Clear filter and show all
         removeFilter()
 
+        // Filter controlling
         binding.filter.setOnClickListener {
             if (binding.menu.visibility != View.VISIBLE) {
                 binding.menu.visibility = View.VISIBLE
@@ -244,8 +232,6 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
         val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
         googleMap.animateCamera(cameraUpdate)
 
-
-
         // Custom Listener
         boundariesListener = BoundariesListener(googleMap)
         binding.mapContainer.loading.visibility = View.VISIBLE
@@ -311,7 +297,9 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
             }.collect { (data, boundaries) ->
                 // Show meteorites by boundaries
                 updateData(data, boundaries) { boundaries.contains(it.position) }
-                binding.filter.visibility = View.VISIBLE
+                withContext(Dispatchers.Main) {
+                    binding.filter.visibility = View.VISIBLE
+                }
             }
         }
     }
@@ -334,100 +322,3 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
 }
 
-class MapMarkersRenderer(
-    private val context: Context,
-    map: GoogleMap,
-    clusterManager: ClusterManager<Meteorite>,
-) : DefaultClusterRenderer<Meteorite>(context, map, clusterManager) {
-
-    private val mapMarkerView: MapMarkerView = MapMarkerView(context)
-    private val markerIconGenerator = IconGenerator(context)
-
-    init {
-        markerIconGenerator.setBackground(null)
-        markerIconGenerator.setContentView(mapMarkerView)
-    }
-
-    override fun onBeforeClusterItemRendered(clusterItem: Meteorite, markerOptions: MarkerOptions) {
-        val data = getItemIcon(clusterItem)
-        markerOptions
-            .icon(data.bitmapDescriptor)
-            .anchor(data.anchorU, data.anchorV)
-    }
-
-    override fun onClusterItemUpdated(clusterItem: Meteorite, marker: Marker) {
-        val data = getItemIcon(clusterItem)
-        marker.setIcon(data.bitmapDescriptor)
-        marker.setAnchor(data.anchorU, data.anchorV)
-    }
-
-    private fun getItemIcon(marker: Meteorite): IconData {
-        // Setting icon by meteorite category
-        val drawable = when(marker.fall) {
-            "Fell" -> AppCompatResources.getDrawable(context, R.drawable.meteorite)
-            "Found" -> AppCompatResources.getDrawable(context, R.drawable.crater)
-            else -> null
-        }
-        // Custom marker view
-        mapMarkerView.setContent(
-            circle = MapMarkerView.CircleContent.Marker,
-            drawable
-        )
-
-        val icon: Bitmap = markerIconGenerator.makeIcon()
-        val r = context.resources
-        val middleBalloon = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24f, r.displayMetrics)
-        return IconData(
-            bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(icon),
-            anchorU = middleBalloon / 2 / icon.width,
-            anchorV = 1f
-        )
-    }
-
-    override fun onBeforeClusterRendered(
-        cluster: Cluster<Meteorite>,
-        markerOptions: MarkerOptions
-    ) {
-        val data = getClusterIcon(cluster)
-        markerOptions
-            .icon(data.bitmapDescriptor)
-            .anchor(data.anchorU, data.anchorV)
-    }
-
-    override fun onClusterUpdated(cluster: Cluster<Meteorite>, marker: Marker) {
-        val data = getClusterIcon(cluster)
-        marker.setIcon(data.bitmapDescriptor)
-        marker.setAnchor(data.anchorU, data.anchorV)
-    }
-
-    private fun getClusterIcon(cluster: Cluster<Meteorite>): IconData {
-        // Custom Cluster view
-        mapMarkerView.setContent(
-            circle = MapMarkerView.CircleContent.Cluster(
-                count = cluster.size
-            ),
-            drawable = null
-        )
-
-        val icon: Bitmap = markerIconGenerator.makeIcon()
-        val r = context.resources
-        val middleBalloon = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24f, r.displayMetrics)
-        return IconData(
-            bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(icon),
-            anchorU = middleBalloon / 2 / icon.width,
-            anchorV = 1f
-        )
-    }
-
-    override fun shouldRenderAsCluster(cluster: Cluster<Meteorite>): Boolean = cluster.size > 10
-
-    private data class IconData(
-        val bitmapDescriptor: BitmapDescriptor,
-        val anchorU: Float,
-        val anchorV: Float,
-    )
-
-    companion object {
-        private const val TAG = "MapMarkersRenderer"
-    }
-}

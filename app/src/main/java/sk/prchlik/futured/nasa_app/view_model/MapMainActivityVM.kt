@@ -63,6 +63,7 @@ class MapMainActivityVM(app: Application,
                         _dataFlow.tryEmit(result.data)
                     }
                     is State.Error -> _dataFlow.tryEmit(mutableListOf())
+                    is State.NoData -> {}
                     State.Loading -> {}
                 }
             }
@@ -76,10 +77,15 @@ class MapMainActivityVM(app: Application,
             meteorites = localRepository.getAll()
         }.invokeOnCompletion {
             if (_meteoritesState.value is State.Loading ||
-                _meteoritesState.value is State.Error) {
+                _meteoritesState.value is State.Error ||
+                _meteoritesState.value is State.NoData) {
                 _meteoritesState.value =
                     if (meteorites.isEmpty()) {
-                        State.Error(R.string.communication_error)
+                        if (_meteoritesState.value is State.NoData) {
+                            State.Error(R.string.communication_error)
+                        } else {
+                            State.NoData
+                        }
                     } else {
                         State.Success(meteorites)
                     }
@@ -92,18 +98,29 @@ class MapMainActivityVM(app: Application,
         when (val communicationResult = remoteRepository.getMeteorites(null)) {
             is CommunicationResult.Success -> {
                 if (_meteoritesState.value is State.Loading ||
-                    _meteoritesState.value is State.Error) {
+                    _meteoritesState.value is State.Error ||
+                    _meteoritesState.value is State.NoData) {
                     _meteoritesState.value = State.Success(communicationResult.data)
                 }
                 State.Success(communicationResult.data)
             }
             is CommunicationResult.Error -> {
-                _meteoritesState.value = State.Error(R.string.communication_error)
-                State.Error(R.string.communication_error)
+                if (_meteoritesState.value is State.NoData) {
+                    _meteoritesState.value = State.Error(R.string.communication_error)
+                    State.Error(R.string.communication_error)
+                } else {
+                    _meteoritesState.value = State.NoData
+                    State.NoData
+                }
             }
             is CommunicationResult.Exception -> {
-                _meteoritesState.value = State.Error(R.string.communication_error)
-                State.Error(R.string.communication_exception)
+                if (_meteoritesState.value is State.NoData) {
+                    _meteoritesState.value = State.Error(R.string.communication_exception)
+                    State.Error(R.string.communication_exception)
+                } else {
+                    _meteoritesState.value = State.NoData
+                    State.NoData
+                }
             }
         }
 
@@ -112,6 +129,7 @@ class MapMainActivityVM(app: Application,
         when(state) {
             is State.Success -> localRepository.updateAll(state.data)
             is State.Error -> {}
+            is State.NoData -> {}
             State.Loading -> {}
         }
     }
