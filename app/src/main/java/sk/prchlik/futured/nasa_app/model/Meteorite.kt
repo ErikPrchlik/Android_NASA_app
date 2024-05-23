@@ -1,13 +1,16 @@
 package sk.prchlik.futured.nasa_app.model
 
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.annotations.SerializedName
 import com.google.maps.android.clustering.ClusterItem
+import kotlinx.parcelize.Parcelize
 
 @Entity(tableName = "meteorites")
+@Parcelize
 data class Meteorite(
     @PrimaryKey @SerializedName("id") val id: Long,
     @ColumnInfo(name = "name") @SerializedName("name") val name: String?,
@@ -24,7 +27,7 @@ data class Meteorite(
     @ColumnInfo(name = "geolocation_state") @SerializedName("geolocation_state") val geoLocationState: String?,
     @ColumnInfo(name = "geolocation_country") @SerializedName("geolocation_country") val geoLocationCountry: String?,
     @ColumnInfo(name = "geolocation_zip") @SerializedName("geolocation_zip") val geoLocationZip: String?
-): ClusterItem {
+): ClusterItem, Parcelable {
 
     @ColumnInfo(name = "lat_long")
         var latLng: LatLng? = null
@@ -33,6 +36,8 @@ data class Meteorite(
                     LatLng(lat, geoLocation.coordinates[0])
                 }
             }
+
+    var massCategory: String? = null
 
     override fun getPosition(): LatLng {
         return latLng!!

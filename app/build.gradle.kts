@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("kotlin-kapt")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -87,4 +88,8 @@ dependencies {
     implementation(libs.androidx.room.rxjava2)
     implementation(libs.androidx.room.paging)
     kapt(libs.androidx.room.compiler)
+
+    implementation(libs.material)
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.viewpager2)
 }
