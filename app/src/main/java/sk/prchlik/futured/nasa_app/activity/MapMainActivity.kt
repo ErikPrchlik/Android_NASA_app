@@ -49,6 +49,8 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var meteorites: MutableList<Meteorite> = mutableListOf()
 
+    private var filter: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -105,6 +107,9 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun removeFilter() {
         binding.filterClear.setOnClickListener {
+
+            filter = null
+
             // Update the map on background thread
             val scope = CoroutineScope(Job() + Dispatchers.IO)
             scope.launch {
@@ -112,7 +117,7 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
                     data to boundaries
                 }.collect { (data, boundaries) ->
                     // Show meteorites by boundaries
-                    updateData(data, boundaries) { boundaries.contains(it.position) }
+                    updateData(data) { boundaries.contains(it.position) }
                 }
             }
             binding.filterClear.visibility = View.GONE
@@ -126,6 +131,8 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
             (view as TextView).setTextColor(this.getColor(R.color.my_primary))
             binding.menuFell.setTextColor(this.getColor(R.color.my_secondary))
 
+            filter = "Found"
+
             // Update the map by filter on background thread
             val scope = CoroutineScope(Job() + Dispatchers.IO)
             scope.launch {
@@ -133,7 +140,7 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
                     data to boundaries
                 }.collect { (data, boundaries) ->
                     // Given lambda function as specific filter for update
-                    updateData(data, boundaries) { boundaries.contains(it.position) && it.fall == "Found" }
+                    updateData(data) { boundaries.contains(it.position) && it.fall == filter }
                 }
             }
 
@@ -147,6 +154,8 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
             (view as TextView).setTextColor(this.getColor(R.color.my_primary))
             binding.menuFound.setTextColor(this.getColor(R.color.my_secondary))
 
+            filter = "Fell"
+
             // Update the map by filter on background thread
             val scope = CoroutineScope(Job() + Dispatchers.IO)
             scope.launch {
@@ -154,7 +163,7 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
                     data to boundaries
                 }.collect { (data, boundaries) ->
                     // Given lambda function as specific filter for update
-                    updateData(data, boundaries) { boundaries.contains(it.position) && it.fall == "Fell" }
+                    updateData(data) { boundaries.contains(it.position) && it.fall == filter }
                 }
             }
 
@@ -179,9 +188,7 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private suspend fun updateData(data: MutableList<Meteorite>,
-                                   boundaries: LatLngBounds,
-                                   f: (Meteorite) -> Boolean) {
+    private suspend fun updateData(data: MutableList<Meteorite>, f: (Meteorite) -> Boolean) {
 
         withContext(Dispatchers.Main) {
             // Clear map content
@@ -296,7 +303,11 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
                 data to boundaries
             }.collect { (data, boundaries) ->
                 // Show meteorites by boundaries
-                updateData(data, boundaries) { boundaries.contains(it.position) }
+                if (filter != null) {
+                    updateData(data) { boundaries.contains(it.position) && it.fall == filter }
+                } else {
+                    updateData(data) { boundaries.contains(it.position) }
+                }
                 withContext(Dispatchers.Main) {
                     binding.filter.visibility = View.VISIBLE
                 }
