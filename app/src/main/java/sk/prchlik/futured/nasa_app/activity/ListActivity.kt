@@ -129,7 +129,9 @@ class ListActivity : AppCompatActivity() {
                         binding.refresh.visibility = View.VISIBLE
                     }
                 }
-                binding.loading.visibility = View.GONE
+                withContext(Dispatchers.Main) {
+                    binding.loading.visibility = View.GONE
+                }
             }
         }
     }
