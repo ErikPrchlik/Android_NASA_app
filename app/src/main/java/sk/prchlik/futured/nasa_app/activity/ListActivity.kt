@@ -86,6 +86,7 @@ class ListActivity : AppCompatActivity() {
             viewModel.dataFlow.collect { data ->
                 if (data.isNotEmpty()) {
                     meteorites = data
+                    meteorites.sortedBy { it.name }
                     massCategorizeMeteorites()
 
                     var filtered = meteorites.filter { !it.fall.isNullOrEmpty() }
@@ -94,12 +95,13 @@ class ListActivity : AppCompatActivity() {
 
 
                     filtered = meteorites.filter { !it.year.isNullOrEmpty() }
+                        .sortedWith(compareByDescending<Meteorite> {it.year} .thenBy {it.name})
                     filteredMap = filtered.groupBy { it.year }
                     val dataByTime = getCategoryData(filteredMap)
 
                     filtered = meteorites
                         .filter { !it.massCategory.isNullOrEmpty() }
-                        .sortedBy { it.mass }
+                        .sortedByDescending { it.mass }
                     filteredMap = filtered.groupBy { it.massCategory }
                     val dataByMass = getCategoryData(filteredMap)
 
