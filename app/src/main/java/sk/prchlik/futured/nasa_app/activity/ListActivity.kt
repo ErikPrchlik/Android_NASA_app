@@ -171,11 +171,12 @@ class ListActivity : AppCompatActivity() {
         Log.d(TAG, meteorites.toString())
         val massList = meteorites.mapNotNull { it.mass?.toDoubleOrNull() }.sorted()
 
+
         // Calculate breakpoints for three classes
         val size = massList.size
-        val firstBreak = massList[size / 4]
-        val secondBreak = massList[size / 2]
-        val thirdBreak = massList[3 * size / 4]
+        val secondBreak = massList.average()
+        val firstBreak = (secondBreak - massList.min()) / 2
+        val thirdBreak = (massList.max() - secondBreak) / 2
 
         // Assign categories based on breakpoints
         meteorites.forEach { meteorite ->
