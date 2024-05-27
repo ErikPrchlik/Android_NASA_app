@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,7 +14,8 @@ import sk.prchlik.futured.nasa_app.R
 
 class MeteoriteCategoryAdapter(private val context: Context?,
                                private val meteoriteCategories: MutableList<MeteoriteCategory>,
-                               private val setListener: (MeteoriteCategory) -> Unit // Callback for loading more data
+                               private val setListener: (MeteoriteCategory) -> Unit, // Callback for loading more data
+                               private val loadData: (String) -> Unit
 
 ) : RecyclerView.Adapter<MeteoriteCategoryAdapter.MeteoriteCategoryViewHolder>() {
 
@@ -25,7 +27,7 @@ class MeteoriteCategoryAdapter(private val context: Context?,
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MeteoriteCategoryViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_meteorite_category, parent, false)
-        return MeteoriteCategoryViewHolder(context!!, view, setListener)
+        return MeteoriteCategoryViewHolder(context!!, view, setListener, loadData)
     }
 
     override fun onBindViewHolder(holder: MeteoriteCategoryViewHolder, position: Int) {
@@ -41,7 +43,9 @@ class MeteoriteCategoryAdapter(private val context: Context?,
     }
 
     class MeteoriteCategoryViewHolder(private val context: Context, itemView: View,
-                                      private val setListener: (MeteoriteCategory) -> Unit) : RecyclerView.ViewHolder(itemView) {
+                                      private val setListener: (MeteoriteCategory) -> Unit,
+                                      private val loadData: (String) -> Unit
+    ) : RecyclerView.ViewHolder(itemView) {
 
         private val meteoriteAdapter: MeteoriteAdapter = MeteoriteAdapter(mutableListOf())
 
@@ -50,6 +54,8 @@ class MeteoriteCategoryAdapter(private val context: Context?,
         private val categoryTitleTextView: TextView = itemView.findViewById(R.id.categoryTitleTextView)
         private val categoryCountTextView: TextView = itemView.findViewById(R.id.categoryCount)
         private val expandButton: View = itemView.findViewById(R.id.expandButton)
+
+        private val loadButton: ImageView = itemView.findViewById(R.id.load)
 
         init {
             meteoritesRecyclerView.layoutManager = LinearLayoutManager(itemView.context)
@@ -79,6 +85,16 @@ class MeteoriteCategoryAdapter(private val context: Context?,
             expandButton.rotation = if (meteoriteCategory.isExpanded) 180f else 0f
 
             setListener(meteoriteCategory)
+
+            loadButton.setOnClickListener {
+                loadData(meteoriteCategory.category)
+            }
+
+            if (meteoriteCategory.isExpanded && meteoriteCategory.hasMore) {
+                loadButton.visibility = View.VISIBLE
+            } else {
+                loadButton.visibility = View.GONE
+            }
 
         }
 

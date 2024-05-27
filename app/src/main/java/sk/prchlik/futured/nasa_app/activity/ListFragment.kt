@@ -52,8 +52,10 @@ class ListFragment : Fragment() {
             meteoriteCategories = it
 
             // Initialize adapters
-            meteoriteCategoryAdapter = MeteoriteCategoryAdapter(context, it)
-                { category -> setListener(category) }
+            meteoriteCategoryAdapter = MeteoriteCategoryAdapter(context, it,
+                { category -> setListener(category) },
+                { categoryName -> loadMoreData(categoryName) }
+            )
 
             // Set adapters to RecyclerViews
             val verticalSpacingHeight = this.resources.getDimensionPixelSize(R.dimen.vertical_spacing) // Adjust as needed
