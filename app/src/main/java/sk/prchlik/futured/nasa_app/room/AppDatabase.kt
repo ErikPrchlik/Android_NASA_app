@@ -11,7 +11,7 @@ import sk.prchlik.futured.nasa_app.repository.local.MeteoriteDao
 
 @Database(
     entities = [Meteorite::class],
-    version = 2
+    version = 1
 )
 
 @TypeConverters(MapConverter::class)

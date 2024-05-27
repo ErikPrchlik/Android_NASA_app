@@ -28,7 +28,7 @@
 
                 <TextView
                     android:id="@+id/categoryTitleTextView"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -36,7 +36,21 @@
                     android:layout_margin="8dp"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"/>
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/categoryCount"/>
+
+                <TextView
+                    android:id="@+id/categoryCount"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/my_secondary"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/expandButton"
+                    android:layout_marginEnd="8dp"/>
 
                 <ImageView
                     android:id="@+id/expandButton"

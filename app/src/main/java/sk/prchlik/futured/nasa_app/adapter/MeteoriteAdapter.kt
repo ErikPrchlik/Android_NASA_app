@@ -37,12 +37,15 @@ class MeteoriteAdapter(
 
     inner class MeteoriteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val titleTextView: TextView = itemView.findViewById(R.id.meteoriteName)
+        private val massCategoryTextView: TextView = itemView.findViewById(R.id.meteoriteMassCategory)
+        private val massTextView: TextView = itemView.findViewById(R.id.meteoriteMass)
 
         // Bind views
         fun bind(meteorite: Meteorite) {
             // Bind trip category data
             titleTextView.text = meteorite.name
-
+            massCategoryTextView.text = meteorite.massCategory
+            massTextView.text = meteorite.mass
         }
     }
 

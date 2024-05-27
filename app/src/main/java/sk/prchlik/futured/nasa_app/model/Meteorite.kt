@@ -18,7 +18,7 @@ data class Meteorite(
     @ColumnInfo(name = "rec_class") @SerializedName("recclass") val recClass: String?,
     @ColumnInfo(name = "mass") @SerializedName("mass") val mass: String?,
     @ColumnInfo(name = "fall") @SerializedName("fall") val fall: String?,
-    @ColumnInfo(name = "year") @SerializedName("year") val year: String?,
+    @ColumnInfo(name = "date") @SerializedName("year") val date: String?,
     @ColumnInfo(name = "rec_lat") @SerializedName("reclat") val recLat: String?,
     @ColumnInfo(name = "rec_long") @SerializedName("reclong") val recLong: String?,
     @ColumnInfo(name = "geo_location") @SerializedName("geolocation") val geoLocation: GeoLocation?,
@@ -39,6 +39,10 @@ data class Meteorite(
 
     var massCategory: String? = null
 
+    fun getYear(): String? {
+        return date?.substring(0,4)
+    }
+
     override fun getPosition(): LatLng {
         return latLng!!
     }
@@ -48,6 +52,6 @@ data class Meteorite(
     }
 
     override fun getSnippet(): String? {
-        return year
+        return date
     }
 }

@@ -94,9 +94,9 @@ class ListActivity : AppCompatActivity() {
                     val dataByCategory = getCategoryData(filteredMap)
 
 
-                    filtered = meteorites.filter { !it.year.isNullOrEmpty() }
-                        .sortedWith(compareByDescending<Meteorite> {it.year} .thenBy {it.name})
-                    filteredMap = filtered.groupBy { it.year }
+                    filtered = meteorites.filter { !it.date.isNullOrEmpty() }
+                        .sortedWith(compareByDescending<Meteorite> {it.getYear()} .thenBy {it.name})
+                    filteredMap = filtered.groupBy { it.getYear() }
                     val dataByTime = getCategoryData(filteredMap)
 
                     filtered = meteorites

@@ -48,6 +48,7 @@ class MeteoriteCategoryAdapter(private val context: Context?,
         private val meteoritesRecyclerView: RecyclerView = itemView.findViewById(R.id.meteoritesRecyclerView)
 
         private val categoryTitleTextView: TextView = itemView.findViewById(R.id.categoryTitleTextView)
+        private val categoryCountTextView: TextView = itemView.findViewById(R.id.categoryCount)
         private val expandButton: View = itemView.findViewById(R.id.expandButton)
 
         init {
@@ -63,6 +64,11 @@ class MeteoriteCategoryAdapter(private val context: Context?,
 
             // Bind trip category data
             categoryTitleTextView.text = meteoriteCategory.category
+            categoryCountTextView.text = meteoriteCategory.count.toString()
+
+            if (meteoriteCategory.category == "Time") {
+
+            }
 
             // Set up sub-items RecyclerView
             this.meteoriteAdapter.updateData(meteoriteCategory.meteoritesToShow)
