@@ -13,6 +13,8 @@ import sk.prchlik.futured.nasa_app.repository.local.MeteoritesLocalRepoImpl
 import sk.prchlik.futured.nasa_app.repository.remote.IMeteoritesRemoteRepo
 import sk.prchlik.futured.nasa_app.repository.remote.MeteoritesAPI
 import sk.prchlik.futured.nasa_app.repository.remote.MeteoritesRemoteRepoImpl
+import sk.prchlik.futured.nasa_app.repository.sync.ISyncRepo
+import sk.prchlik.futured.nasa_app.repository.sync.SyncRepoImpl
 import sk.prchlik.futured.nasa_app.room.AppDatabase
 import sk.prchlik.futured.nasa_app.view_model.MapMainActivityVM
 
@@ -24,10 +26,12 @@ val repositoryModule = module {
 
     factory { provideMeteoriteDao(androidApplication()) }
     single { provideMeteoritesLocalRepo(get()) }
+
+    single { provideSyncRepo(get(), get()) }
 }
 
 val appModule = module {
-    viewModel { MapMainActivityVM(androidApplication(), get(), get()) }
+    viewModel { MapMainActivityVM(androidApplication(), get()) }
 }
 
 fun provideAppToken(): String {
@@ -51,4 +55,8 @@ fun provideMeteoriteDao(app: Application): MeteoriteDao = AppDatabase.getDatabas
 
 fun provideMeteoritesLocalRepo(meteoriteDao: MeteoriteDao): IMeteoritesLocalRepo {
     return MeteoritesLocalRepoImpl(meteoriteDao)
+}
+
+fun provideSyncRepo(localRepo: IMeteoritesLocalRepo, remoteRepo: IMeteoritesRemoteRepo): ISyncRepo {
+    return SyncRepoImpl(localRepo, remoteRepo)
 }

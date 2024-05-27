@@ -160,7 +160,7 @@ class ListActivity : AppCompatActivity() {
     private fun onRefreshClick() {
         // New load data request
         binding.refresh.setOnClickListener {
-            viewModel.getData()
+            viewModel.refreshData()
             binding.loading.visibility = View.VISIBLE
             binding.refresh.visibility = View.GONE
         }

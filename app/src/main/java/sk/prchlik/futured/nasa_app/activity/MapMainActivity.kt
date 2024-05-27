@@ -62,6 +62,8 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment!!.getMapAsync(this)
 
+        viewModel.sync()
+
         // Meteorite list view
         binding.listView.setOnClickListener { view ->
             startActivity(Intent(this, ListActivity::class.java))
@@ -77,7 +79,7 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun onRefreshClick() {
         // New load data request
         binding.refresh.setOnClickListener {
-            viewModel.getData()
+            viewModel.refreshData()
             binding.mapContainer.loading.visibility = View.VISIBLE
             binding.refresh.visibility = View.GONE
         }
