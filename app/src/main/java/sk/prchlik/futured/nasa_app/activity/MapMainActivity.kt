@@ -2,6 +2,7 @@ package sk.prchlik.futured.nasa_app.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -65,7 +66,7 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
         viewModel.sync()
 
         // Meteorite list view
-        binding.listView.setOnClickListener { view ->
+        binding.listView.setOnClickListener {
             startActivity(Intent(this, ListActivity::class.java))
         }
 

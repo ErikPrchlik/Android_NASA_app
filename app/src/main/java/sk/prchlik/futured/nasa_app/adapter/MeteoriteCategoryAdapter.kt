@@ -72,10 +72,6 @@ class MeteoriteCategoryAdapter(private val context: Context?,
             categoryTitleTextView.text = meteoriteCategory.category
             categoryCountTextView.text = meteoriteCategory.count.toString()
 
-            if (meteoriteCategory.category == "Time") {
-
-            }
-
             // Set up sub-items RecyclerView
             this.meteoriteAdapter.updateData(meteoriteCategory.meteoritesToShow)
             meteoritesRecyclerView.adapter = meteoriteAdapter
