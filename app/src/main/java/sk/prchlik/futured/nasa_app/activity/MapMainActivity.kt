@@ -12,6 +12,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -29,6 +30,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import sk.prchlik.futured.nasa_app.R
 import sk.prchlik.futured.nasa_app.databinding.ActivityMainBinding
 import sk.prchlik.futured.nasa_app.model.Meteorite
+import sk.prchlik.futured.nasa_app.utils.parcelable
 import sk.prchlik.futured.nasa_app.view.MapMarkersRenderer
 import sk.prchlik.futured.nasa_app.view_model.MapMainActivityVM
 
@@ -36,9 +38,12 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object {
         private const val TAG = "MapMainActivity"
+        private const val MAP_CAMERA_POSITION = "map_camera_position"
+        private const val BOUNDARIES = "boundaries"
     }
 
     private lateinit var binding: ActivityMainBinding
+    private var savedInstanceState: Bundle? = null
 
     private lateinit var googleMap: GoogleMap
     private var mapFragment: SupportMapFragment? = null
@@ -54,6 +59,7 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        this.savedInstanceState = savedInstanceState
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -75,6 +81,24 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Refresh button on communication error
         onRefreshClick()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // Save the map's camera position
+        outState.putParcelable(MAP_CAMERA_POSITION, googleMap.cameraPosition)
+
+        Log.d(TAG, "onSaveInstanceState")
+
+        // Save custom state if needed, e.g., markers
+        val scope = CoroutineScope(Job() + Dispatchers.IO)
+        scope.launch {
+            viewModel.dataFlow.combine(boundariesListener.boundariesFlow) { data, boundaries ->
+                data to boundaries
+            }.collect { (_, boundaries) ->
+                outState.putParcelable(BOUNDARIES, boundaries)
+            }
+        }
     }
 
     private fun onRefreshClick() {
@@ -226,8 +250,6 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(gMap: GoogleMap) {
         googleMap = gMap
 
-        //TODO Save/Load state
-
         // Load the custom dark map style
         val darkMapStyle = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark)
 
@@ -239,8 +261,8 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
         // Initialize the map position
         val latLng = LatLng(48.685867415751666, 19.356373470760435) // specify your latitude and longitude here
         val zoomLevel = 7f // specify your zoom level here
-        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
-        googleMap.animateCamera(cameraUpdate)
+        val defaultCameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
+        googleMap.animateCamera(defaultCameraUpdate)
 
         // Custom Listener
         boundariesListener = BoundariesListener(googleMap)
@@ -264,6 +286,37 @@ class MapMainActivity : AppCompatActivity(), OnMapReadyCallback {
         // OnClick actions
         onClusterClick()
         onClusterItemClick()
+
+        // Restore the saved state if available
+        savedInstanceState?.let { bundle ->
+            Log.d(TAG, "Restoring state")
+            val cameraPosition: CameraPosition? = bundle.parcelable(MAP_CAMERA_POSITION)
+            cameraPosition?.let { position ->
+                googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(position))
+            }
+            val boundariesState: LatLngBounds? = bundle.parcelable(BOUNDARIES)
+            boundariesState?.let { boundaries ->
+
+                val scope = CoroutineScope(Job() + Dispatchers.IO)
+                scope.launch {
+                    viewModel.dataFlow.collect { data ->
+                        if (filter != null) {
+                            updateData(data) { boundaries.contains(it.position) && it.fall == filter }
+                        } else {
+                            updateData(data) { boundaries.contains(it.position) }
+                        }
+                    }
+                }
+
+                Log.d(TAG, "SUCCESSFUL STATE")
+
+            }
+        }
+
+        // Add a default marker if there is no saved state
+        if (savedInstanceState == null) {
+            googleMap.moveCamera(defaultCameraUpdate)
+        }
     }
 
     private fun onClusterItemClick() {
